@@ -1,0 +1,647 @@
+<<<<<<< HEAD
+<!--
+ CANAL INTERNET E COISAS
+ Projeto de IoT #8 - Monitor Ambiental com ESP32 e MQTT
+ Dashboard via HTTP
+ 11/2019 - Andre Michelon
+-->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Internet e Coisas #92</title>
+  <style>
+    body {
+      padding-top: 10px;
+      font-family: Verdana, Arial, Helvetica, sans-serif;
+      font-size: 11px;
+      color: black;
+      margin: 5px;
+      background: #a0a0a0 url("https://internetecoisas.com.br/img/Background.jpg") no-repeat fixed center;
+      background-size: cover;
+    }
+    th {
+      padding: 5px;
+      border-radius: 12px;
+      color: #ffffff;
+      background: #404040;
+      border: #000000 solid 3px;
+    }
+    td {
+      text-align: center;
+      padding: 5px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: #000000 solid 3px;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script>
+    /***************************************************
+     * Acesso HTTP
+     */
+    function reqChange() {
+      // Atualiza dados
+      if (this.readyState == 4) {
+        if (this.status == 200 && this.responseText != null) {
+          console.log('Atualizando... ' + this.responseText);
+          var data = this.responseText.split('&');
+
+          // Temperatura
+          x = parseFloat(data[0]);
+
+          // Gauge Temperatura
+          dataTemG.setValue(0, 1, x);
+          chartTemG.draw(dataTemG, optionsTemG);
+
+          // Histórico Temperatura
+          dataTemH.addRows([[new Date(), x]]);
+          if (dataTemH.getNumberOfRows() > 30) {
+            // Excluir linha de dados
+            dataTemH.removeRow(0);
+          }
+          chartTemH.draw(dataTemH, optionsTemH);
+
+          // Umidade
+          x = parseFloat(data[1]);
+
+          // Gauge Umidade
+          dataUmiG.setValue(0, 1, x);
+          chartUmiG.draw(dataUmiG, optionsUmiG);
+
+          // Histórico Umidade
+          dataUmiH.addRows([[new Date(), x]]);
+          if (dataUmiH.getNumberOfRows() > 30) {
+            // Excluir linha de dados
+            dataUmiH.removeRow(0);
+          }
+          chartUmiH.draw(dataUmiH, optionsUmiH);
+
+          // Iluminação
+          x = parseFloat(data[2]);
+
+          // Gauge Iluminação
+          dataLuzG.setValue(0, 1, x);
+          chartLuzG.draw(dataLuzG, optionsLuzG);
+
+          // Histórico Iluminação
+          dataLuzH.addRows([[new Date(), x]]);
+          if (dataLuzH.getNumberOfRows() > 30) {
+            // Excluir linha de dados
+            dataLuzH.removeRow(0);
+          }
+          chartLuzH.draw(dataLuzH, optionsLuzH);
+
+          // Atualização
+          x = new Date(data[3]);
+          document.getElementById('dt').innerText = x.toLocaleDateString() + ' ' + x.toLocaleTimeString();
+        } else {
+          alert('Falha obtendo dados.');
+        }
+      }
+    }
+
+    var reqUpdate = new XMLHttpRequest();
+    reqUpdate.onreadystatechange = reqChange;
+
+    function HTTPUpdate() {
+      reqUpdate.open('GET', '/getData', true);
+      reqUpdate.send(null);
+      window.setTimeout('HTTPUpdate()', 10000);
+    }
+
+    /***************************************************
+     * Gráficos
+     */
+
+    // Instancias dos gráficos
+    google.charts.load('current', {'packages':['gauge', 'corechart'], 'language': 'pt-br', 'mapsApiKey': 'AIzaSyBWF8UvD9TyJSKsSCKP3PtHisRPbG4zuRA'});
+    google.charts.setOnLoadCallback(drawTemG);
+    google.charts.setOnLoadCallback(drawTemH);
+    google.charts.setOnLoadCallback(drawUmiG);
+    google.charts.setOnLoadCallback(drawUmiH);
+    google.charts.setOnLoadCallback(drawLuzG);
+    google.charts.setOnLoadCallback(drawLuzH);
+
+    // Variáveis para gráficos
+    var chartTemG, dataTemG, optionsTemG, chartTemH, dataTemH, optionsTemH;
+    var chartUmiG, dataUmiG, optionsUmiG, chartUmiH, dataUmiH, optionsUmiH;
+    var chartLuzG, dataLuzG, optionsLuzG, chartLuzH, dataLuzH, optionsLuzH;
+
+    function drawTemG() {
+      // Desenha Gauge Temperatura
+      dataTemG = google.visualization.arrayToDataTable([
+        ['Label', 'Value'],
+        ['Temp. °C', 0]
+      ]);
+      optionsTemG = {
+        min: -10, max: 50,
+        majorTicks: ['-10', '0', '10', '20', '30', '40', '50'],
+        minorTicks: 2,
+        greenFrom: -10, greenTo: 10,
+        greenColor: '#00c0ff',
+        redFrom: 30, redTo: 50
+      };
+      chartTemG = new google.visualization.Gauge(document.getElementById('temG'));
+      chartTemG.draw(dataTemG, optionsTemG);
+    }
+
+    function drawUmiG() {
+      // Desenha Gauge Umidade
+      dataUmiG = google.visualization.arrayToDataTable([
+        ['Label', 'Value'],
+        ['Umid. %', 0]
+      ]);
+      optionsUmiG = {
+        min: 0, max: 100,
+        majorTicks: ['0', '20', '40', '60', '80', '100'],
+        minorTicks: 2,
+        redFrom: 0, redTo: 30,
+        yellowFrom: 80, yellowTo: 100
+      };
+      chartUmiG = new google.visualization.Gauge(document.getElementById('umiG'));
+      chartUmiG.draw(dataUmiG, optionsUmiG);
+    }
+
+    function drawLuzG() {
+      // Desenha Gauge Iluminação
+      dataLuzG = google.visualization.arrayToDataTable([
+        ['Label', 'Value'],
+        ['Ilum. %', 0]
+      ]);
+      optionsLuzG = {
+        min: 0, max: 100,
+        majorTicks: ['0', '20', '40', '60', '80', '100'],
+        minorTicks: 2,
+        redFrom: 0, redTo: 40,
+        yellowFrom: 40, yellowTo: 70,
+        greenFrom: 70, greenTo: 100,
+      };
+      chartLuzG = new google.visualization.Gauge(document.getElementById('luzG'));
+      chartLuzG.draw(dataLuzG, optionsLuzG);
+    }
+
+    function drawTemH() {
+      // Desenha Histórico Temperatura
+      dataTemH = new google.visualization.DataTable();
+      dataTemH.addColumn('datetime', 'Hora');
+      dataTemH.addColumn('number', 'Temperatura');
+      optionsTemH = {
+        title: 'Histórico de Temperatura',
+        pointSize: 3,
+        legend: 'none',
+        animation:{
+          duration: 500,
+          easing: 'out'
+        },
+        curveType: 'function',
+        hAxis: {
+          title: 'Data/Hora',
+          format: 'dd/MM HH:mm',
+          gridlines: {
+            count: 6
+          }
+        },
+        vAxis: {
+          title: 'Temperatura (°C)',
+          format: 'long',
+          gridlines: {
+            count: 7
+          },
+          viewWindow: {
+            min: -10,
+            max: 50
+          }
+        }
+      };
+      dataTemH.addRows([[new Date(), 0]]);
+      chartTemH = new google.visualization.LineChart(document.getElementById('temH'));
+      chartTemH.draw(dataTemH, optionsTemH);
+    }
+
+    function drawUmiH() {
+      // Desenha Histórico Umidade
+      dataUmiH = new google.visualization.DataTable();
+      dataUmiH.addColumn('datetime', 'Hora');
+      dataUmiH.addColumn('number', 'Umidade');
+      optionsUmiH = {
+        title: 'Histórico de Umidade',
+        pointSize: 3,
+        legend: 'none',
+        animation:{
+          duration: 500,
+          easing: 'out'
+        },
+        curveType: 'function',
+        hAxis: {
+          title: 'Data/Hora',
+          format: 'dd/MM HH:mm',
+          gridlines: {
+            count: 6
+          }
+        },
+        vAxis: {
+          title: 'Umidade (%)',
+          format: 'long',
+          gridlines: {
+            count: 7
+          },
+          viewWindow: {
+            min: 0,
+            max: 100
+          }
+        }
+      };
+      dataUmiH.addRows([[new Date(), 0]]);
+      chartUmiH = new google.visualization.LineChart(document.getElementById('umiH'));
+      chartUmiH.draw(dataUmiH, optionsUmiH);
+    }
+
+    function drawLuzH() {
+      // Desenha Histórico Iluminação
+      dataLuzH = new google.visualization.DataTable();
+      dataLuzH.addColumn('datetime', 'Hora');
+      dataLuzH.addColumn('number', 'Iluminação');
+      optionsLuzH = {
+        title: 'Histórico de Iluminação',
+        pointSize: 3,
+        legend: 'none',
+        animation:{
+          duration: 500,
+          easing: 'out'
+        },
+        curveType: 'function',
+        hAxis: {
+          title: 'Data/Hora',
+          format: 'dd/MM HH:mm',
+          gridlines: {
+            count: 6
+          }
+        },
+        vAxis: {
+          title: 'Iluminação (%)',
+          format: 'long',
+          gridlines: {
+            count: 7
+          },
+          viewWindow: {
+            min: 0,
+            max: 100
+          }
+        }
+      };
+      dataLuzH.addRows([[new Date(), 0]]);
+      chartLuzH = new google.visualization.LineChart(document.getElementById('luzH'));
+      chartLuzH.draw(dataLuzH, optionsLuzH);
+    }
+  </script>
+</head>
+<body onload="HTTPUpdate()">
+  <table align="center">
+    <tr>
+      <th colspan="2">Monitor de Condições Ambientais - Internet e Coisas #92</th>
+    </tr>
+    <tr>
+      <td id="temG" style="width: 200px; height: 200px;"></td>
+      <td id="temH" style="width: 600px; height: 200px;"></td>
+    </tr>
+    <tr>
+      <td id="umiG" style="width: 200px; height: 200px;"></td>
+      <td id="umiH" style="width: 600px; height: 200px;"></td>
+    </tr>
+    <tr>
+      <td id="luzG" style="width: 200px; height: 200px;"></td>
+      <td id="luzH" style="width: 600px; height: 200px;"></td>
+    </tr>
+    <tr>
+      <th>Última atualização:</th>
+      <th id="dt">dd/mm/aaaa hh:mm:ss</th>
+    </tr>
+  </table>
+</body>
+</html>
+=======
+<!--
+ CANAL INTERNET E COISAS
+ Projeto de IoT #8 - Monitor Ambiental com ESP32 e MQTT
+ Dashboard via HTTP
+ 11/2019 - Andre Michelon
+-->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Internet e Coisas #92</title>
+  <style>
+    body {
+      padding-top: 10px;
+      font-family: Verdana, Arial, Helvetica, sans-serif;
+      font-size: 11px;
+      color: black;
+      margin: 5px;
+      background: #a0a0a0 url("https://internetecoisas.com.br/img/Background.jpg") no-repeat fixed center;
+      background-size: cover;
+    }
+    th {
+      padding: 5px;
+      border-radius: 12px;
+      color: #ffffff;
+      background: #404040;
+      border: #000000 solid 3px;
+    }
+    td {
+      text-align: center;
+      padding: 5px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: #000000 solid 3px;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script>
+    /***************************************************
+     * Acesso HTTP
+     */
+    function reqChange() {
+      // Atualiza dados
+      if (this.readyState == 4) {
+        if (this.status == 200 && this.responseText != null) {
+          console.log('Atualizando... ' + this.responseText);
+          var data = this.responseText.split('&');
+
+          // Temperatura
+          x = parseFloat(data[0]);
+
+          // Gauge Temperatura
+          dataTemG.setValue(0, 1, x);
+          chartTemG.draw(dataTemG, optionsTemG);
+
+          // Histórico Temperatura
+          dataTemH.addRows([[new Date(), x]]);
+          if (dataTemH.getNumberOfRows() > 30) {
+            // Excluir linha de dados
+            dataTemH.removeRow(0);
+          }
+          chartTemH.draw(dataTemH, optionsTemH);
+
+          // Umidade
+          x = parseFloat(data[1]);
+
+          // Gauge Umidade
+          dataUmiG.setValue(0, 1, x);
+          chartUmiG.draw(dataUmiG, optionsUmiG);
+
+          // Histórico Umidade
+          dataUmiH.addRows([[new Date(), x]]);
+          if (dataUmiH.getNumberOfRows() > 30) {
+            // Excluir linha de dados
+            dataUmiH.removeRow(0);
+          }
+          chartUmiH.draw(dataUmiH, optionsUmiH);
+
+          // Iluminação
+          x = parseFloat(data[2]);
+
+          // Gauge Iluminação
+          dataLuzG.setValue(0, 1, x);
+          chartLuzG.draw(dataLuzG, optionsLuzG);
+
+          // Histórico Iluminação
+          dataLuzH.addRows([[new Date(), x]]);
+          if (dataLuzH.getNumberOfRows() > 30) {
+            // Excluir linha de dados
+            dataLuzH.removeRow(0);
+          }
+          chartLuzH.draw(dataLuzH, optionsLuzH);
+
+          // Atualização
+          x = new Date(data[3]);
+          document.getElementById('dt').innerText = x.toLocaleDateString() + ' ' + x.toLocaleTimeString();
+        } else {
+          alert('Falha obtendo dados.');
+        }
+      }
+    }
+
+    var reqUpdate = new XMLHttpRequest();
+    reqUpdate.onreadystatechange = reqChange;
+
+    function HTTPUpdate() {
+      reqUpdate.open('GET', '/getData', true);
+      reqUpdate.send(null);
+      window.setTimeout('HTTPUpdate()', 10000);
+    }
+
+    /***************************************************
+     * Gráficos
+     */
+
+    // Instancias dos gráficos
+    google.charts.load('current', {'packages':['gauge', 'corechart'], 'language': 'pt-br', 'mapsApiKey': 'AIzaSyBWF8UvD9TyJSKsSCKP3PtHisRPbG4zuRA'});
+    google.charts.setOnLoadCallback(drawTemG);
+    google.charts.setOnLoadCallback(drawTemH);
+    google.charts.setOnLoadCallback(drawUmiG);
+    google.charts.setOnLoadCallback(drawUmiH);
+    google.charts.setOnLoadCallback(drawLuzG);
+    google.charts.setOnLoadCallback(drawLuzH);
+
+    // Variáveis para gráficos
+    var chartTemG, dataTemG, optionsTemG, chartTemH, dataTemH, optionsTemH;
+    var chartUmiG, dataUmiG, optionsUmiG, chartUmiH, dataUmiH, optionsUmiH;
+    var chartLuzG, dataLuzG, optionsLuzG, chartLuzH, dataLuzH, optionsLuzH;
+
+    function drawTemG() {
+      // Desenha Gauge Temperatura
+      dataTemG = google.visualization.arrayToDataTable([
+        ['Label', 'Value'],
+        ['Temp. °C', 0]
+      ]);
+      optionsTemG = {
+        min: -10, max: 50,
+        majorTicks: ['-10', '0', '10', '20', '30', '40', '50'],
+        minorTicks: 2,
+        greenFrom: -10, greenTo: 10,
+        greenColor: '#00c0ff',
+        redFrom: 30, redTo: 50
+      };
+      chartTemG = new google.visualization.Gauge(document.getElementById('temG'));
+      chartTemG.draw(dataTemG, optionsTemG);
+    }
+
+    function drawUmiG() {
+      // Desenha Gauge Umidade
+      dataUmiG = google.visualization.arrayToDataTable([
+        ['Label', 'Value'],
+        ['Umid. %', 0]
+      ]);
+      optionsUmiG = {
+        min: 0, max: 100,
+        majorTicks: ['0', '20', '40', '60', '80', '100'],
+        minorTicks: 2,
+        redFrom: 0, redTo: 30,
+        yellowFrom: 80, yellowTo: 100
+      };
+      chartUmiG = new google.visualization.Gauge(document.getElementById('umiG'));
+      chartUmiG.draw(dataUmiG, optionsUmiG);
+    }
+
+    function drawLuzG() {
+      // Desenha Gauge Iluminação
+      dataLuzG = google.visualization.arrayToDataTable([
+        ['Label', 'Value'],
+        ['Ilum. %', 0]
+      ]);
+      optionsLuzG = {
+        min: 0, max: 100,
+        majorTicks: ['0', '20', '40', '60', '80', '100'],
+        minorTicks: 2,
+        redFrom: 0, redTo: 40,
+        yellowFrom: 40, yellowTo: 70,
+        greenFrom: 70, greenTo: 100,
+      };
+      chartLuzG = new google.visualization.Gauge(document.getElementById('luzG'));
+      chartLuzG.draw(dataLuzG, optionsLuzG);
+    }
+
+    function drawTemH() {
+      // Desenha Histórico Temperatura
+      dataTemH = new google.visualization.DataTable();
+      dataTemH.addColumn('datetime', 'Hora');
+      dataTemH.addColumn('number', 'Temperatura');
+      optionsTemH = {
+        title: 'Histórico de Temperatura',
+        pointSize: 3,
+        legend: 'none',
+        animation:{
+          duration: 500,
+          easing: 'out'
+        },
+        curveType: 'function',
+        hAxis: {
+          title: 'Data/Hora',
+          format: 'dd/MM HH:mm',
+          gridlines: {
+            count: 6
+          }
+        },
+        vAxis: {
+          title: 'Temperatura (°C)',
+          format: 'long',
+          gridlines: {
+            count: 7
+          },
+          viewWindow: {
+            min: -10,
+            max: 50
+          }
+        }
+      };
+      dataTemH.addRows([[new Date(), 0]]);
+      chartTemH = new google.visualization.LineChart(document.getElementById('temH'));
+      chartTemH.draw(dataTemH, optionsTemH);
+    }
+
+    function drawUmiH() {
+      // Desenha Histórico Umidade
+      dataUmiH = new google.visualization.DataTable();
+      dataUmiH.addColumn('datetime', 'Hora');
+      dataUmiH.addColumn('number', 'Umidade');
+      optionsUmiH = {
+        title: 'Histórico de Umidade',
+        pointSize: 3,
+        legend: 'none',
+        animation:{
+          duration: 500,
+          easing: 'out'
+        },
+        curveType: 'function',
+        hAxis: {
+          title: 'Data/Hora',
+          format: 'dd/MM HH:mm',
+          gridlines: {
+            count: 6
+          }
+        },
+        vAxis: {
+          title: 'Umidade (%)',
+          format: 'long',
+          gridlines: {
+            count: 7
+          },
+          viewWindow: {
+            min: 0,
+            max: 100
+          }
+        }
+      };
+      dataUmiH.addRows([[new Date(), 0]]);
+      chartUmiH = new google.visualization.LineChart(document.getElementById('umiH'));
+      chartUmiH.draw(dataUmiH, optionsUmiH);
+    }
+
+    function drawLuzH() {
+      // Desenha Histórico Iluminação
+      dataLuzH = new google.visualization.DataTable();
+      dataLuzH.addColumn('datetime', 'Hora');
+      dataLuzH.addColumn('number', 'Iluminação');
+      optionsLuzH = {
+        title: 'Histórico de Iluminação',
+        pointSize: 3,
+        legend: 'none',
+        animation:{
+          duration: 500,
+          easing: 'out'
+        },
+        curveType: 'function',
+        hAxis: {
+          title: 'Data/Hora',
+          format: 'dd/MM HH:mm',
+          gridlines: {
+            count: 6
+          }
+        },
+        vAxis: {
+          title: 'Iluminação (%)',
+          format: 'long',
+          gridlines: {
+            count: 7
+          },
+          viewWindow: {
+            min: 0,
+            max: 100
+          }
+        }
+      };
+      dataLuzH.addRows([[new Date(), 0]]);
+      chartLuzH = new google.visualization.LineChart(document.getElementById('luzH'));
+      chartLuzH.draw(dataLuzH, optionsLuzH);
+    }
+  </script>
+</head>
+<body onload="HTTPUpdate()">
+  <table align="center">
+    <tr>
+      <th colspan="2">Monitor de Condições Ambientais - Internet e Coisas #92</th>
+    </tr>
+    <tr>
+      <td id="temG" style="width: 200px; height: 200px;"></td>
+      <td id="temH" style="width: 600px; height: 200px;"></td>
+    </tr>
+    <tr>
+      <td id="umiG" style="width: 200px; height: 200px;"></td>
+      <td id="umiH" style="width: 600px; height: 200px;"></td>
+    </tr>
+    <tr>
+      <td id="luzG" style="width: 200px; height: 200px;"></td>
+      <td id="luzH" style="width: 600px; height: 200px;"></td>
+    </tr>
+    <tr>
+      <th>Última atualização:</th>
+      <th id="dt">dd/mm/aaaa hh:mm:ss</th>
+    </tr>
+  </table>
+</body>
+</html>
+>>>>>>> a999f467d0d8ec227170bef607b275053355a84a

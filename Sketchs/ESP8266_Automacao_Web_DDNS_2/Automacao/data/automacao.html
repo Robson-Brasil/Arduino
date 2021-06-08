@@ -1,0 +1,437 @@
+<html>
+    <head>
+      <meta name='viewport' content='width=device-width, initial-scale=1, user-scalable=no'/>
+      <meta charset="UTF-8">
+      <title>ESP8266</title>
+      <style>
+        body{
+            text-align: center;
+            font-family: sans-serif;
+            font-size: 14px;
+        }
+
+        p{
+            color:#444;
+            font-size: 12px;
+        }
+        
+        input{
+            outline: none;
+            border: 0;
+            border-radius:6px;
+            padding: 0 5px 0 5px;
+            margin: 5px;
+            color: #1fa3ec;
+            width: 100px;
+            height: 30px;
+        }
+
+        select {
+            outline: none;
+            border: 0;
+            border-radius:6px;
+            background-color:#FFF;
+            color: #1fa3ec;
+            width: 90px;
+            height: 30px;
+            margin: 5px;
+        }
+
+        option {
+            background-color: #1fa3ec; 
+            color: white;
+        }
+
+        .button_add{
+            outline: none;
+            border: 0;
+            border-radius:10px;
+            background-color:#FFF;
+            color: #1fa3ec;
+            margin: 5px;
+            font-size: 15px;
+            width: 50px;
+            height: 30px
+        }
+
+        .button_add:active{
+            border: 1px solid #1fa3ec;
+            background-color:#1fa3ec;
+            color: #fff;
+        }
+
+        .button_off{
+            outline: none;
+            display: block;
+            border: 2px solid #1fa3ec;
+            border-radius:18px;
+            background-color:#FFF;
+            color: #1fa3ec;
+            width: 150px;
+            height: 30px;
+            margin: 10px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .button_on{
+            outline: none;
+            display: block;
+            border: 2px solid #1fa3ec;
+            border-radius:18px;
+            background-color:#1fa3ec;
+            color: #fff;
+            width: 150px;
+            height: 30px;
+            margin: 10px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .controls_container{
+            display: inline-block;
+            background-color: #1fa3ec;
+            padding:0 5px 0 5px;
+            border-radius:6px;
+        }
+
+        .buttons_container{
+            padding:5px;
+            overflow: auto;
+            width: calc(100% - 10px);
+            height: calc(100% - 55px);
+        }
+      </style>
+    </head>
+    <body>
+        <div class="controls_container">
+            <select id="selectPinNumber"></select>
+            <input id="inputPinName" type="text" placeholder="Name"/>
+            <button id="buttonAddRemove" class="button_add">+</button>
+        </div>
+        <div id="buttonsContainer" class="buttons_container"></div>
+    </body>
+    <script>
+
+        //Mude pelo ddns que você cadastrou
+        const URL = "http://automacaoesp.ddns.net/";
+
+        //Campo de texto para digitar o nome do botão que será vinculado ao pino escolhido da lista
+        var inputPinName = document.getElementById("inputPinName");
+        //Select com a lista de pinos
+        var selectPinNumber = document.getElementById("selectPinNumber");
+        //Botão que vai adicionar ou remover os botões
+        var buttonAddRemove = document.getElementById("buttonAddRemove");
+        //Container onde os botões serão adicionados
+        var buttonsContainer = document.getElementById("buttonsContainer");
+        //Lista de pinos em uso (que aparecerão como botões) no container
+        //Esta lista é retornada na função 'getPins'
+        var pins;
+
+        //Faz a requisição ao ESP para saber quais os pinos estão salvos
+        getPins();
+
+        function getPins()
+        {
+            //Variável que faz o request http
+            var xmlhttp = new XMLHttpRequest();
+            //Callback, função que será executada quando a requisição terminar
+            xmlhttp.onload = onLoadPinList;
+            //Abrimos e enviamos a requisição na rota 'pinList'
+            xmlhttp.open("GET", URL + "pinList", true);
+            xmlhttp.send();
+        }
+
+        //Função executada quando o ESP responder a requsição na rota 'pinList'
+        function onLoadPinList()
+        {
+            //Se a requisição foi bem sucedida
+            if(this.status == 200)
+            {
+                //remove todas as opções anteriores
+                while (selectPinNumber.lastChild) 
+                {
+                    selectPinNumber.removeChild(selectPinNumber.lastChild);
+                }
+
+                //Cria uma nova opção que nao pode ser selecionada, apenas para informar
+                //sobre o que o select possui os números dos pinos
+                var opt = document.createElement("option");
+                opt.innerHTML = "Pin Number";
+                opt.setAttribute("disabled", "");
+                selectPinNumber.appendChild(opt);
+
+                //remove todos os botões
+                while (buttonsContainer.lastChild) 
+                {
+                    buttonsContainer.removeChild(buttonsContainer.lastChild);
+                }
+
+                //Cria um objeto a partir do json que nos foi retornado
+                var json = JSON.parse(this.responseText);
+                var count = json.count;
+
+                //Esta é a lista de pinos em uso, salvos no ESP, retornados por ele na requisição em 'pinList'
+                pins = json.pins;
+
+                //Para cada pino que pode ser selecionado
+                for(var i=0; i<count; i++)
+                {
+                    //Criamos uma opcão com o número do pino e colocamos no select
+                    var opt = document.createElement("option");
+                    opt.innerHTML = i;
+                    opt.value = i;
+                    selectPinNumber.appendChild(opt);
+                }
+
+                //Para cada pino em uso
+                for(var i=0; i<pins.length; i++)
+                {
+                    //Mantém uma referência às informações do pino de forma que seja possível acessá-lo no callback
+                    let pin = pins[i];
+                    //Cria um novo botão para alterar o estado deste pino
+                    var btn = document.createElement("button");
+                    //Adiciona a classe css ao botão de acordo com o estado do mesmo
+                    btn.classList.add(pin.value == 1 ? "button_on" : "button_off");
+                    //Para sabermos o quanto de tempo que o usuário pressionou o botão
+                    var pressTimer;
+                    //Se o usuário pressionou o botao tempo o suficiente para considerarmos um 'Long Press'
+                    var didLong;
+
+                    //Quando o usuário pressiona o botão
+                    btn.onmousedown = function()
+                    {
+                        //No inicio não é um 'Long Press'
+                        didLong = false;
+                        //Adicionamos um timer para que depois de 500 milisegundos execute uma função
+                        pressTimer = window.setTimeout(function()
+                        { 
+                            //Se essa função foi executada significa que o usuário não soltou o botão antes dos 500 milisegundos
+                            //Dizemos então que ele executou um 'Long Press'
+                            //No select no topo da página selecionamos a opção referente ao pino que este botão controla
+                            selectPinNumber.selectedIndex = pin.number + 1;
+                            //Fazemos com que o event change do select seja executado
+                            //Esse evento irá executar a função que mostra na barra do topo o nome do botão/pino selecionado
+                            selectPinNumber.dispatchEvent(new Event("change"));
+                            //Colocamos 'didLong' em 'true' para não fazermos nada no click
+                            //Em caso de 'Long Press' apenas mostramos o nome do botão/pino na barra do topo, não fazemos
+                            //nada que altere o estado do pino
+                            didLong = true;
+                        }, 500);
+                        return false; 
+                    };
+
+                    //Quando o usuário solta o botão
+                    btn.onmouseup = function()
+                    {
+                        //Limpamos o 'timer' e se isso acontecer antes dos 500 milisegundos então a função que diz que
+                        //o usuário executou um 'Long Press' não será executada
+                        clearTimeout(pressTimer);
+                        return false;
+                    }
+                    
+                    btn.onclick = function(e)
+                    {   
+                        //Se o usuário executou um 'Long Press' já fizemos tudo o que tinhamos que fazer na função do timer
+                        //então retornamos e não fazemos nada aqui
+                        if(didLong) return;
+
+                        //Fazemos o select mostrar o pino cujo botão foi clicado e disparamos o evento 'change'
+                        selectPinNumber.selectedIndex = pin.number + 1;
+                        selectPinNumber.dispatchEvent(new Event("change"));
+
+                        //O 'target' do evento nesse caso é o botão clicado
+                        var b = e.target;
+                        //Dizemos que o botão está no estado ligado quando está com a classe 'button_on'
+                        var isOn = b.classList.contains('button_on');
+                        //Valor do estado que o botão/pino vai depois de clicado
+                        var value;
+
+                        //Se o botão/pino está atualmente no estado de ligado
+                        if(isOn)
+                        {
+                            //Removemos a classe 'button_on'
+                            b.classList.remove("button_on");
+                            //Adicionamos a classe 'button_off'
+                            b.classList.add("button_off");
+                            //Se ele estava ligado significa que agora vai para desligado
+                            value = 0;
+                        }
+                        else
+                        {
+                            //Removemos a classe 'button_off'
+                            b.classList.remove("button_off");
+                            //Adicionamos a classe 'button_on'
+                            b.classList.add("button_on");
+                            //Se ele estava desligado significa que agora vai para ligado
+                            value = 1;
+                        }
+                        
+                        //Enviamos um post para o ESP dizendo o número do pino que teve seu estado alterado
+                        //e o valor para qual este pino foi
+                        sendPost("digitalWrite", "pinNumber=" + pin.number + "&pinValue=" + value, null, null);
+                    }
+
+                    //O texto que aparecerá no botão será o nome dado ao pino
+                    btn.innerHTML = pin.name;
+                    //Adicionamos o botão em tela
+                    buttonsContainer.appendChild(btn);
+                }
+
+                //Colocamos os elementos em seu estado padrão
+                //O botão no topo mostrará o simbolo de adicionar
+                buttonAddRemove.innerHTML = "+";
+                //O campo de texto que se digita o nome que se dará ao botão/pino
+                inputPinName.value = "";
+                //Habilitamos o campos de texto
+                inputPinName.disabled = false;
+                //O select mostrará a primeira opção
+                selectPinNumber.options[0].setAttribute("selected", "");
+            }
+            else
+            {
+                alert("Erro ao recuperar informações");
+            }
+        }
+
+        //Evento que ocorre quando o usuário muda a opção  do select de pinos
+        selectPinNumber.onchange = function(e)
+        {
+            //A função 'pinUsed' (declarada mais abaixo) retorna os dados do pino se ele já estiver em uso em algum botão
+            //Caso contrário retonará null
+            var inUse = pinUsed(this.value);
+            
+            
+            if(inUse)
+            {
+                //Se já estiver em uso apenas mostramos o nome dele no campo de texto, sem deixar trocar
+                inputPinName.disabled = true;
+                inputPinName.value = inUse.name;
+                //Se o pino já estiver vinculado a algum botão o botão vai mostrar '-' (remover) ao invés e '+' (adicionar)
+                buttonAddRemove.innerHTML =  "-";
+            }
+            else if(inputPinName.disabled)
+            {
+                //Se não estiver em uso deixamos o campo e texto habilitado para que ele insira o nome que vinculará ao botão
+                //que comandará este pino
+                inputPinName.disabled = false;
+                inputPinName.value = "";
+                //Se o pino não estiver vinculado a algum botão o botão vai mostrar '+' (adicionar) ao invés e '-' (remover)
+                buttonAddRemove.innerHTML = "+";
+            }
+        }
+
+        //Executada quando o usuário clica no botão +/-
+        buttonAddRemove.onclick = function(e)
+        {
+            //Verificamos se a opção selecionada é um pino em uso
+            var inUse = pinUsed(selectPinNumber.value);
+
+            //Se não estiver em uso
+            if(!inUse)
+            {
+                //Verificamos se a opção selecionada é válida e se o usuário colocou um nome para
+                //o botão que comandará este pino
+                if(selectPinNumber.selectedIndex != 0 && inputPinName.value.trim().length != 0)
+                {
+                    //Chamamos a função que enviará um request para o ESP adicionar um pino com
+                    //as informações passadas pelo usuário
+                    addPin(inputPinName.value, selectPinNumber.value,
+                        //Caso a operação tenha sido bem sucedida
+                        function()
+                        {
+                            getPins();
+                            inputPinName.value = "";
+                        },
+                        //Caso a operação tenha falhado
+                        function()
+                        {
+                            alert("Erro ao adicionar ação");
+                        });
+                }
+                //Caso ele não tenha selecionado um pino válido ou não tenha colocado um nome para o botão
+                else
+                {
+                    //Exibe um alerta para o usuário informando o que aconteceu de errado
+                    alert("Você precisa escolher um nome para a ação e o número do gpio que esta ação será vinculada");
+                }
+            }
+            //Caso o pino já esteja em uso significa que o usuário quer remover o botão que comanda este pino
+            else
+            {
+                //Chamamos a função que enviará um request para o ESP remover o pino
+                removePin(selectPinNumber.value, 
+                    //Caso a operação tenha sido bem sucedida
+                    function()
+                    {
+                        getPins();
+                    },
+                    //Caso a operação tenha falhado
+                    function()
+                    {
+                        alert("Erro ao remover ação");
+                    });
+            }
+        }
+
+        //Envia um request para o ESP adionar um novo pino à lista
+        function addPin(pinName, pinNumber, success, failure)
+        {
+            sendPost("addPin", "pinName="+pinName + "&pinNumber="+pinNumber, success, failure);
+        }
+
+        //Envia um request para o ESP saber que o pino não deve mais aparecer na lista
+        function removePin(pinNumber, success, failure)
+        {
+            sendPost("removePin", "pinNumber="+pinNumber, success, failure);
+        }
+
+        //Verifica se o pino que possui o gpio 'number' já está em uso
+        function pinUsed(number)
+        {
+            for(var i=0; i<pins.length; i++)
+            {
+                if(pins[i].number == number)
+                {
+                    //Achou o pino na lista, significa que ele está em uso então retornamos ele
+                    return pins[i];
+                }
+            }
+
+            //Se chegou aqui é porque verificou todos os pinos na lista e nenhum deles possui o gpio passado
+            //significando que ele está livre
+            return null;
+        }
+
+        //Envia para o ESP um post com os dados ('data') na rota escolhida ('path')
+        function sendPost(path, data, success, failure)
+        {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("POST", URL + path, true);
+            
+            //Callback que será executado quando a requisição terminar
+            xmlhttp.onload = function() 
+            {
+                //Caso a operação tenha sido bem sucedida
+                if(this.status == 200)
+                {
+                    if(success != null)
+                    {
+                        //Chama o callback de sucesso que foi passado como parâmetro 
+                        success();
+                    }
+                }
+                //Caso a operação tenha falhado
+                else
+                {
+                    if(failure != null)
+                    {
+                        //Chama o callback de falha que foi passado como parâmetro 
+                        failure();
+                    }
+                }
+            }
+            xmlhttp.send(data);
+        }
+    </script>
+  </html>
