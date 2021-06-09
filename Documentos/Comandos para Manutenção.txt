@@ -1,0 +1,20 @@
+Descobrir o serial do windows sem programas
+
+CMD: wmic path softwarelicensingservice get OA3xOriginalProductKey
+
+Powershell: powershell “(Get-WmiObject -query ‘select * from SoftwareLicensingService’).OA3xOriginalProductKey”
+
+Verificar se existem erros nos HDs
+
+CMD: wmic diskdrive get caption,status
+
+CMD: chkdsk /f /r ( Isso permitirá o Windows rastrear o HD e corrigir eventuais arquivos e pastas corrompidas. Aqui você tecla tecla S, fecha a janela e reinicia o Windows. E antes do Windows ser carregado novamente, o chkdsk fará uma verificação completa do seu HD, e isso pode levar um tempão, então seja paciente e aguarde até o final, quando o computador será reiniciado novamente e o Windows será carregado.)
+
+Verificar se existem erros nos arquivos do windows corrompidos
+
+CDM: sfc /scannow
+
+Se o sfc encontrar algum erro que ele eventualmente não possa resolver, daí eu sugiro você executar esse comando DISM / Online /Cleanup-Image /RestoreHealth e aguardar a finalização
+
+
+

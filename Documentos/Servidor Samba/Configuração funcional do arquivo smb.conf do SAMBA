@@ -1,0 +1,51 @@
+#======================= Global Settings =======================
+
+[global]
+
+    workgroup = SERVIDOR
+    netbios name = servidor
+    client max protocol = NT1
+    client max protocol = SMB3
+    server string = Servidor de Arquivos
+    security = user
+    dns proxy = no
+    interfaces = lo enp0s7
+    bind interfaces only = true
+    log file = /var/log/samba/log.%m
+    max log size = 1000
+    syslog = 0
+    panic action = /usr/share/samba/panic-action %d
+    security = user
+    encrypt passwords = yes
+    passdb backend = tdbsam
+    obey pam restriction = yes
+    guest account = nobody
+    invalid users = root
+    passwd program = /usr/bim/passwd %u
+    map to guest = bad user
+    server role = standalone server
+    max protocol = SMB3_11
+    ldap ssl = No
+    server signing = Auto
+    
+#==================== Diretorio Restrito =====================
+
+[PastasCompatilhadas]
+
+coment = Pastas para compartilhamentos de arquivos.
+path = /home/pastascompartilhadas
+valid users = @robsonbrasil
+guest ok = no
+writable = yes
+browseable = yes
+
+[Convidados]
+
+coment = Pastas para compartilhamentos de arquivos com usuários externos.
+path = /home/convidados
+guest ok = yes
+writable = yes
+browseable = yes
+
+
+

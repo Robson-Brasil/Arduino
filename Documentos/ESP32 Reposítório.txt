@@ -1,0 +1,5 @@
+Nós e os nossos parceiros armazenamos e/ou acedemos a informações num dispositivo, tais como cookies e processamos dados pessoais, tais como identificadores exclusivos e informações padrão enviadas por um dispositivo para anúncios e conteúdos personalizados, medição de anúncios e conteúdos e informações do público-alvo, assim como para desenvolver e melhorar produtos.
+
+Com a sua permissão, nós e os nossos parceiros podemos usar dados precisos de localização geográfica e identificação através da digitalização do dispositivo. Pode clicar para consentir com o nosso processamento e o dos nossos parceiros, conforme descrito acima. Como alternativa, pode aceder a informações mais detalhadas e alterar as suas preferências antes de consentir. Observe que o processamento dos seus dados pessoais pode não exigir o seu consentimento, mas tem o direito de se opor a esse processamento. As suas preferências serão aplicadas apenas a este website.
+
+https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json

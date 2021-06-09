@@ -1,0 +1,27 @@
+
+gparted
+
+sudo blkid
+
+
+Para automontar particiones ntfs de Windows en /media abra una terminal y escriba:
+
+sudo mkdir /media/Windows
+sudo su
+echo "/dev/sdxx /media/Windows ntfs defaults,umask=007,gid=46 0 0" >> /etc/fstab
+
+
+Para automontar particiones fat32 en /media abra una terminal y escriba:
+
+sudo mkdir /media/Data
+sudo su
+echo "/dev/sdxx /media/Data vfat umask=0000,uid=1000,gid=1000,auto,rw,users 0 0" >> /etc/fstab
+
+
+
+Para automontar particiones ext3 de Linux en /media abra una terminal y escriba:
+
+sudo mkdir /media/Data
+sudo su
+echo "/dev/sdxx /media/Data ext3 defaults,noatime 0 2" >> /etc/fstab
+

@@ -1,0 +1,16 @@
+Arquivo a ser criado: /etc/netplan/01-netcfg.yaml
+
+Conteúdo do arquivo:
+# This file describes the network interfaces available on your system
+# For more information, see netplan(5).
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp0sX: (Trocar o "X" pela numeração da sua placa de rede)
+      dhcp4: no
+      dhcp6: no
+      addresses: [xxx.xxx.x.x/24] (Trocar o "x" pelo IP desejado)
+      gateway4: xxx.xxx.x.x (Trocar o "x" pelo IP do Gatway do roteador)
+      nameservers:
+        addresses: [xxx.xx.xxx.xxx,xxx.xx.xxx.xxx] (Usar o DNS de sua preferência)

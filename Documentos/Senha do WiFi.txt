@@ -1,0 +1,3 @@
+const char*  ssid = "MOTOROLA-A7CE9"; // <-- Digite aqui o nome da sua rede WiFi
+const char* password = "3104e43ece65b0885fa9"; // <-- Digite aqui a senha da sua rede WiFi
+String EasyToken = "62e84e52-ce72-4b2b-842a-5ae267cec948"; // <-- Cole aqui seu Easy Token, obtido na plataforma https://app.easyiot.com.br

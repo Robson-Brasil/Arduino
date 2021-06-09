@@ -1,0 +1,17 @@
+A estrutura de diretorios do Linux e mais ou menos assim:
+
+1. / = Raiz.
+2. /bin = executáveis e comandos do sistema
+3. /boot = arquivos para iniciar o sistema (imagem bootavel do kernel)
+4. /dev = dispositivos do sistema (HDs, CD-ROM...)
+5. /etc = arquivos de configuração do sistema.
+6. /home = diretorio padrão do(s) usuário(s).
+7. /lib = onde ficam as bibliotecas essenciais ao sistema
+8. /mnt = geralmente é utilizado para pontos de montagem dos dispostivos.
+9. /proc = possui informações do Kernel e de processos.
+10. /opt = onde estão os aplicativos instalados que não venham com o Linux.
+11. /root = diretório do superusuário root.
+12. /sbin = onde estão os arquivos essenciais do sistema.
+13. /tmp = arquivos temporários.
+14. /usr = arquivos pertencentes aos usuários.
+15. /var = onde são guardadas informações variáveis, logs etc.

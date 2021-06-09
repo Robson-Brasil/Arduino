@@ -1,0 +1,7 @@
+ UUID de todos os HDs Plugados
+
+HD do Sistema : /dev/sda UUID=175250b1-9cba-457a-8876-39586ea3f63e
+
+HD 2 : UUID=f363bd80-c3f4-4198-af06-cad4b2786a02
+
+HD 3: UUID=89c2b550-f533-4d6d-aa77-0ee78393374b

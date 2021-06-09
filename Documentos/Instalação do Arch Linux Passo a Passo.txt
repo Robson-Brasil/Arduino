@@ -1,0 +1,90 @@
+Antes de tudo de o comando...
+loadkeys br-abnt2 #Teclado em português
+
+### Passo 1 (Particionando o disco)
+
+fdisk -l # Lista os discos existentes em seu hardware
+cfdisk /dev/sd? # Troque o ? pela letra que identifica seu discos
+
+# Dentro do programa cfdisk, talvez apareça uma janela com algumas opçoes de formatos de arquivos, entre eles GPT,DOS etc... escolha GPT
+# Ja dentro do cfdisk se você tiver mais de uam partiçao, exclua todas, na opçao "Delete" e va até a opção "New"
+# Crie uma partição para sua / do tamaho que desejar.
+# Se você deixou uma parte para a swap entao va ate o restante de memória que aparece e em "New" novamente.
+# Então va em Type e selecione a opçao Linux Swap / Solaris "Pode se que a palavra solaris nao aparece"
+# Depois disto vá em "Write" e em seguida digite yes, vá em "Quit" e já está tudo pronto.
+
+### Passo 2 (Formatar as partições e monta-las)
+
+mkfs.ext4 /dev/sda? # Troque o ? pelo número que representa sua partiçao /
+mkswap /dev/sda? # Troque o ? pelo número que representa a sua swap
+swapon /dev/sda? # Este comando fará com que a swap passe a funcionar
+mount /dev/sda? /mnt # Este comando irá montar sua partição / dentro do sistema
+
+### Passo 3 (Baixando a base do sistema,kernel e os firmwares)
+
+pacstrap /mnt base linux linux-firmare # Este comando ira instalar a (base o kernel e os firmwares)
+# OBS. Se você quiser usar o AUR, voce deve tambem instalar o pacote (base-devel) que trará as ferramentas de compilação usadas nos pacotes da AUR
+# O comando ficaria: pacstrap /mnt base base-devel linux linux-firmare
+
+### Passo 3 (Criando o fstab e entrando no sistema)
+
+genfstab /mnt >> /etc/fstab # Este comando cria o arquivo (fstab) dentro de /etc, neste arquivo estarão sua / e sua swap
+arch-chroot /mnt # Este comando muda seu sistema da live para dentro do sistema principal
+
+### Passo 4 (Criando senha root, usuario e senha de usuario)
+
+passwd # Crie a senha root
+userdd -m -g users -G wheel _seu_nome_de_usuario # Este comando cria seu usuário, com permissões de sudo
+passwd _seu_nome_de_usuario # Crie uma senha para seu usuário
+
+### Passo 5 (Grub)
+
+pacman -S grub # Este comando baixa o grub
+grub-install --target=i386-pc --recheck /dev/sd? # Este comando iunstala o grub # Troque o ? pela letra que representa seu disco.
+# OBS. Não use nem um numero para instalar o grub apenas use /dev/sda sem numero
+grub-mkconfig -o /boot/grub/grub.cfg # Este conado cria o arquivo de configuraçao do grub
+
+### Passo 6 (Gestor de login, pacotes de internet e audio)
+
+pacman -S lxdm # Instala o gestor de login (lxdm)
+pacman -S dhcpcd # Instala o (dhcpcd) Este ira pegar seu ip de forma altomatica no login
+pacman -S networkmanager # Instala o (networkmanager) que sera usado para configurar sua rede
+pacman -S networkmanager-applet # Instala o networkmanager-applet que cria um icone em sua barra de tarefaz.
+# Para o audio tem duas opçoes, escolha uma das duas.
+pacman -S alsa Insta o alsa que será responsável pelo áudio
+pacman -S pulseaudio # Instala o pulseaudio que será responsável pelo áudio
+
+systemctl enable lxdm # Seta o lxdm para iniciar com o sistema
+systemctl enable NetworkManager # Seta o networkmanager para iniciar com o sistema
+# OBS. Note que NetworkManager eats com duas letras em maiusculo
+systemctl enable dhcpcd # Seta o dhcpcd para iniciar com o sistema
+
+### Passo 7 (Idioma,data e hora)
+
+pacman -S nano # Editor de texto que sera usado em algumas configuraçoes
+echo "pt_BR.UTF-8" >> /etc/locale.configurar # Cria um arquivo dentro de /etc com o seu idioma em pt_BR
+nano /etc/locale.gen # Você irá editar este arquivo de uma forma simples
+# Localize a linha que contém as seguintes informações.
+
+#pt_BR.UTF-8 UTF-8  
+#pt_BR ISO-8859-1  
+#pt_PT.UTF-8 UTF-8  
+#pt_PT ISO-8859-1  
+#pt_PT@euro ISO-8859-15
+
+# Apague a # da linha #pt_BR.UTF-8 UTF-8 no caso a primeira
+
+ ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime # Este comando cria um link simbólico para setar sua data e horas
+ 
+ ### Passo 8 (Instalando pacotes pessoais)
+ 
+ # Nesta etapa você pode instalar o'que quiser, exemplo
+  Interfaces gráficas como (gnome,cinnamon,xfce etc)
+  Terminal como (xfce4-terminal,tilix,terminator etc...)
+  Gestor de arquivos como (nemo, nautilus,thunar etc..)
+  Navegador Web como (chromium,opera,firefox etc) OBS. O pacote Chrome esta disponível no AUR
+ # Esta etapa e pessoal e cabe a você decidir oque quer instalar
+ 
+ ### Passo 9 (Reiniciar)
+ exit
+ reboot

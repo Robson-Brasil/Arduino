@@ -1,0 +1,10 @@
+==================================================
+Product Name      : Windows (BIOS OEM Key)
+Product ID        : 
+Product Key       : 3RTWN-K4FVV-QP7FB-97M9Y-HT8K9
+Installation Folder : 
+Service Pack      : 
+Computer Name     : 
+Modified Time     : 
+==================================================
+

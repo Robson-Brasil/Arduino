@@ -1,0 +1,27 @@
+Baixe o DUC e salve o arquivo para: /usr/local/src
+Abra o terminal e execute o seguinte:
+cd /usr/local/src
+tar xzf noip-duc-linux.tar.gz
+cd no-ip-2.1.9
+make
+make install
+Crie o arquivo de configuração: /usr/local/bin/noip2 -C
+Você será solicitado a inserir seu nome de usuário e senha para não-IP, e para os nomes de servidor que desejar atualizar.
+Iniciar o DUC: /usr/local/bin/noip2
+Precisa de instruções mais detalhadas? Consulte nosso artigo da Base de
+
+
+Please deploy a DNS TXT record under the name
+_acme-challenge.robsonbrasil.sytes.net with the following value:
+
+jkMdZUPPDOjzlDTxFagUGt4-f1CUNnqEpyHQOFi9kFQ
+
+Before continuing, verify the record is deployed.
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Press Enter to Continue
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Please deploy a DNS TXT record under the name
+_acme-challenge.sytes.net with the following value:
+
+OfZE7BUc_z4HH5htESAfC6FtEpW8gdGl0Ug5XlMdjqY

@@ -1,0 +1,183 @@
+Instalar o Libre Office
+sudo add-apt-repository -y ppa:libreoffice/ppa -y
+sudo apt update && sudo apt-get install libreoffice libreoffice-style-breeze -f -y
+sudo apt install libreoffice-l10n-pt-br -f -y
+
+Instalação do Xed Editor
+sudo apt update && sudo apt-get install xed -f -y
+
+Neofetch
+sudo add-apt-repository ppa:dawidd0811/neofetch -y
+sudo apt update && sudo apt install neofetch -f -y
+
+Desabilitando o Baloo do KDE 
+sudo rm /etc/xdg/autostart/baloo_file.desktop
+sudo touch /etc/xdg/autostart/baloo_file.desktop
+sudo rm -rf ~/.local/share/baloo
+sudo kill -9 $(pidof baloo_file)
+sudo kill -9 $(pidof baloo_file_extractor)
+
+Pulse Effects
+sudo add-apt-repository ppa:mikhailnov/pulseeffects -y
+sudo apt update && sudo apt install pulseaudio pulseeffects --install-recommends -f -y
+
+Como Instalar o Ulauncher
+sudo add-apt-repository ppa:agornostal/ulauncher -y
+sudo apt update && sudo apt install ulauncher -f -y
+
+Instalar o KidCad
+sudo add-apt-repository --yes ppa:js-reynaud/kicad-5.1
+sudo apt update && sudo apt install --install-recommends kicad -f -y
+# If you want demo projects
+sudo apt install kicad-demos
+
+Instalar o QElectro Tech
+sudo add-apt-repository ppa:scorpio/qelectrotech-dev -y
+sudo apt-get update && sudo apt-get install qelectrotech qelectrotech-data qelectrotech-examples qet-tb-generator -f -y
+
+Instalar o gEDA
+Somente pela loja
+
+Instalar o Discord
+wget "https://discordapp.com/api/download?platform=linux&format=deb" -O discord.deb
+sudo dpkg -i discord.deb
+sudo apt-get install -f -y
+
+Instalar o Telegram
+sudo add-apt-repository ppa:atareao/telegram
+sudo apt-get update && sudo apt-get install telegram
+
+Atualizar os PPAs
+sudo apt-get update && sudo apt-get upgrade && sudo apt-get dist-upgrade
+
+Como instalar o KDE Connect
+
+sudo add-apt-repository ppa:webupd8team/indicator-kdeconnect
+sudo apt update && sudo apt install indicator-kdeconnect -f -y
+
+Autorizar as portas no UFW
+sudo ufw allow 1714:1764/udp
+sudo ufw allow 1714:1764/tcp
+sudo ufw reload
+
+Como instalar o KODI
+sudo apt-get install software-properties-common
+sudo add-apt-repository ppa:team-xbmc/ppa -y
+sudo apt-get update && sudo apt-get install kodi -f -y
+
+Como instalar o Gnome-Pie
+sudo apt install gnome-pie -f -y
+
+Como instalar o Geary Mail
+sudo add-apt-repository ppa:geary-team/releases -y
+sudo apt update && sudo apt install geary -f -y
+
+Como instalar a IDE do Arduino
+Baixar a última versao no site
+Descompactar
+Mover para a pasta /opt
+sudo mv arduino-1.8.12 /opt
+Tornar o script executavel
+sudo chmod +x install.sh
+Instalar 
+sudo ./install.sh
+Autorizar a porta serial
+sudo usermod -a -G tty teu_usuario
+sudo usermod -a -G dialout teu_usuario
+
+
+Como instalar o Visual Studio Code
+sudo add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
+wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | sudo apt-key add -
+sudo apt-get update && sudo apt-get install code -f -y
+
+Como instalar o Inkscape 1.0
+sudo add-apt-repository universe
+sudo add-apt-repository ppa:inkscape.dev/trunk
+sudo apt-get update
+sudo apt-get install inkscape-trunk
+
+Para limpar o Cache/Buffer de RAM:
+sudo -i
+sync; echo 1 > /proc/sys/vm/drop_caches
+
+Para limpar dentries e inodes:
+sudo -i
+sync; echo 2 > /proc/sys/vm/drop_caches
+
+Para limpar tudo: Cache/Buffer, Dentries e Inodes:
+sudo -i
+sync; echo 3 > /proc/sys/vm/drop_caches
+
+Para limpar o espaço em disco consumido pela SWAP:
+sudo -i
+swapoff -a && swapon -a
+
+Instalar o VLC via repositorio
+sudo add-apt-repository ppa:nicola-onorata/desktop
+sudo add-apt-repository ppa:videolan/master-daily
+sudo apt update && sudo apt install vlc -f -y
+
+Como instalar a última versão estável do Chrome
+
+sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+sudo apt-get update
+Se aparecer um erro com a mensagem abaixo…;
+
+"Failed to fetch http://dl.google.com/linux/chrome/deb/dists/stable/Release\n Unable to find
+expected entry 'main/binary-i386/Packages' in Release file (Wrong sources.list entry or malformed file)\n
+Some index files failed to download. They have been ignored, or old ones used instead."
+sudo sed -i -e 's/deb http/deb [arch=amd64] http/' "/etc/apt/sources.list.d/google.list" && sudo sed -i -e 's/deb http/deb [arch=amd64] http/' "/opt/google/chrome/cron/google-chrome"
+sudo apt-get update
+sudo apt-get install google-chrome-stable -f -y
+
+Desisntalar Mozilla Firefox
+sudo apt-get purge firefox
+sudo rm -Rf /etc/firefox/
+sudo rm -Rf /usr/lib/firefox*
+
+Como resolver o problema do tearing no Ubuntu 18.04 em Laptops com Optimus
+
+sudo su
+sudo echo "options nvidia-drm modeset=1" >> /etc/modprobe.d/nvidia-drm-nomodeset.conf
+sudo update-initramfs -u
+Para verificar se as alterações anteriores funcionam após a reinicialização, execute o comando (a saída deve ser “Y”):
+sudo cat /sys/module/nvidia_drm/parameters/modeset
+
+E se você tiver RAM mais do que suficiente, configure a tendência de troca (swap tendency) para um valor inferior, executando os comandos abaixo:
+
+sudo echo "# Sharply reduce Swappiness inclination" >> /etc/sysctl.conf
+sudo echo "vm.swappiness=10" >> /etc/sysctl.conf
+
+Instalando Prime Indicator
+sudo add-apt-repository ppa:nilarimogard/webupd8
+sudo apt-get update && sudo apt-get install prime-indicator -f -y
+ou
+sudo apt update && sudo apt install prime-indicator-plus -f -y
+
+
+Instalando o qBittorrent
+Se ainda não tiver, adicione o repositório do programa com este comando ou use esse tutorial;
+
+sudo add-apt-repository ppa:qbittorrent-team/qbittorrent-stable
+Atualize o APT e Instale o Programa:
+sudo apt update && sudo apt install qbittorrent -f -y
+
+
+1. Adicione o repositório do Etcher:
+
+echo "deb https://deb.etcher.io stable etcher" | sudo tee /etc/apt/sources.list.d/balena-etcher.list
+
+2. Ative a chave de autenticação:
+
+sudo apt-key adv --keyserver hkps://keyserver.ubuntu.com:443 --recv-keys 379CE192D401AB61
+
+3. Atualize seu sistema:
+
+sudo apt update
+sudo apt upgrade
+
+4. Instale o aplicativo:
+
+sudo apt install balena-etcher-electron -f -y

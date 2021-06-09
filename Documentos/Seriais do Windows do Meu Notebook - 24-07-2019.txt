@@ -1,0 +1,36 @@
+Serial dos 2(dois) Microsoft Windows 10 que tenho no meu Notebook
+
+================================================================================================
+Product Name      : Windows SingleLengauge (BIOS OEM Key)
+Product ID        : 
+Product Key       : 3RTWN-K4FVV-QP7FB-97M9Y-HT8K9
+Installation Folder : 
+Service Pack      : 
+Build Number      : 
+Computer Name     : 
+Modified Time     : 
+================================================================================================
+
+================================================================================================
+Product Name      : Windows 10 Pro
+Product ID        : 00330-80000-00000-AA777
+Product Key       : VK7JG-NPHTM-C97JM-9MPGT-3V66T (Chave gerada pela Microsoft)
+Installation Folder : C:\Windows
+Service Pack      : 
+Build Number      : 18362
+Computer Name     : ROBSONBRASIL
+Modified Time     : 22/07/2019 08:14:08
+================================================================================================
+
+================================================================================================
+Nome do Computador            : ROBSONBRASIL
+Edição do Windows             : Microsoft Windows 10 Pro
+Versão do Service Pack        : 
+Arquitetura                   : 64 bits
+Número da Versão              : 18362
+Registado para                : Robson Brasil
+Canal de origem (ProductID)   : 00330-80000-00000-AA777
+Chave do produto (ProductKey) : 3HRFF-6F62K-3D27H-39YRT-P7B9H (Chave Original)
+================================================================================================
+
+

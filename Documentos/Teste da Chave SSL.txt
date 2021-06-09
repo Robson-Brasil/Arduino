@@ -1,0 +1,6 @@
+Please deploy a DNS TXT record under the name
+_acme-challenge.robsonbrasil.com.br with the following value:
+
+Qe09B8w68bkVpawlrt3QVfZSr_iZxITe_DbNyWhiklk
+
+Before continuing, verify the record is deployed.

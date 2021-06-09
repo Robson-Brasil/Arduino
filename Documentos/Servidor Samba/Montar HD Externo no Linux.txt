@@ -1,0 +1,4 @@
+Montar HD Externo no Linux
+sudo mount /dev/sdb1 /home/servidor/HDExterno
+sudo mount /dev/sdd1 /home/servidor/NetflixParticular2
+/dev/sdc1: UUID="89c2b550-f533-4d6d-aa77-0ee78393374b"

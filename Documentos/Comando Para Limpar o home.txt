@@ -1,0 +1,1 @@
+sudo rm -r .* !(Livros|polybar-themes|Certificado SSH|Meus Temas do Polybar|Sistemas Operacioanais ISOs|Commpactados|Vundle.vim|rofi.sh*|Documentos|Vídeos|Downloads|WebApp|Drivers Nvidia|fonts|GitRepositório|Música|Imagens|Programas|nerd-fonts)

@@ -1,0 +1,12 @@
+Números das Tags dos cartões RFID
+
+Tag Chaveiro Azul - 39 BF F3 5C //Cartão 4
+
+Tag Cartão Branco - if (conteudo.substring(1) == "62 92 7C 1C") //Cartão 1 para liberar acesso
+
+Tag Cartão de Passe Único - if (conteudo.substring(1) == "CA 75 DD 23") //Cartão 3 para liberar acesso
+
+Tag Cartão Estudantil - if (conteudo.substring(1) == "2D CA 08 1C") //Cartão 2 para liberar acesso
+
+Tag do Galaxy Note 4 - 08 BB AD A7 (Tags Aleatórias)
+

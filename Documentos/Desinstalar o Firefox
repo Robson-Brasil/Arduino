@@ -1,0 +1,15 @@
+sudo apt-get purge firefox
+sudo rm -r /etc/firefox/
+sudo rm -r /usr/lib/firefox*
+
+
+
+sudo apt purge firefox
+ls -a
+rm -r .mozilla/
+cd /etc
+rm -r firefox/
+cd /usr/lib
+sudo rm -r firefox*/
+
+

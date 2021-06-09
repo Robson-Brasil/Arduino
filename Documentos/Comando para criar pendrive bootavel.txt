@@ -1,0 +1,1 @@
+sudo dd if=imagem_iso of=/dev/sd? status=progress && sync

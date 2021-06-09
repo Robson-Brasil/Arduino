@@ -1,0 +1,32 @@
+Passo 1) Adicionar o repositório oficial do Webmin. Para isso basta editar o ficheiro /etc/apt/sources.list e adicionar as seguintes linhas:
+
+deb http://download.webmin.com/download/repository sarge contrib
+deb http://webmin.mirror.somersettechsolutions.co.uk/repository sarge contrib
+ 
+
+Passo 2) Adicionar a chave GPG
+
+sudo wget http://www.webmin.com/jcameron-key.asc
+sudo apt-key add jcameron-key.asc
+ 
+
+Passo 3) Atualizar a lista de sources
+
+sudo apt-get update
+ 
+
+Passo 4) Instalar o webmin
+
+O Webmin ocupa cerca de 140 MB.
+
+sudo apt-get install webmin
+ 
+
+Passo 5) Abrir a porta 10000 no Firewall.
+
+Por omissão o Webmin usa a porta 10000.
+(para entender melhor a gestão de Firewall com ufw dê uma olhada neste ARTIGO)
+
+Para abrir na Firewall as comunicações para essa porta basta executar o seguinte comando:
+
+sudo ufw allow 10000

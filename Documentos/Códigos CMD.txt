@@ -1,0 +1,39 @@
+(primeiro passo) copie e cole no CMD como adimin aguarde finalizar e reinicie o computador:
+
+net stop wuauserv
+
+cd %systemroot%\SoftwareDistribution
+
+ren Download Download.old
+
+net start wuauserv
+
+net stop bits
+
+net start bits
+
+net stop cryptsvc
+
+cd %systemroot%\system32
+
+ren catroot2 catroot2old
+
+net start cryptsvc
+
+(segundo passo) após reiniciar copie e cole o comando no CMD como adimin e aguarde finalizar:
+
+DISM.exe /Online /Cleanup-image /Scanhealth
+
+(terceiro passo) copie e cole o comando e aguarde:
+
+DISM.exe /Online /Cleanup-image /Restorehealth
+
+(quarto passo) use o comando e aguarde finalizar:
+
+SFC/SCANNOW
+
+(quinto e ultimo) caso esteja finalizado com êxito:
+
+CHKDSK/SPOTFIX
+
+confirme a verificação com a letra (s) para verificar na proxima reinicialização do windows.......E é só pessoal espero que ajude a solucionar este erro

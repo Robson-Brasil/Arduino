@@ -1,0 +1,34 @@
+Pinagens do Modulo RFID - Buzzer e Servo Motor
+
+Pinos do RFID no Arduino Uno
+
+SDA  - Pino 10
+SCK  - Pino 13
+MOSI - Pino 11
+MISO - Pino 12
+IRQ  - Pino "nenhum"
+GND  - Qualquer GND do Arduino
+RST  - Pino 9
+3.3v - Pino 3.3v do Arduino
+
+Pinos do Buzzer
+
+GND - Qualquer GND do Arduino
+Fio Positivo - 4
+
+Pinos do Servo Motor
+
+GND - Qualquer GND do Arduino
+5v  - Pino de 5v do Arduino
+Sinal - 5
+
+LEDs
+
+LED Vermelho - Pino 8
+LED Verde    - Pino 7
+Led Azul     - Pino 6
+
+Botão de Rset da Gravação das Tags
+
+GND - Qualquer Pino GND do Arduino
+Sinal - Pino 3

@@ -1,0 +1,499 @@
+Configurando um Servidor de Arquivos no Linux com o Samba
+Hoje em dia, em redes domésticas é comum a presença de um roteador que faz o compartilhamento do acesso à internet entre os diversos dispositivos conectados à rede. Também é comum haver apenas uma impressora compartilhada para todos os dispositivos conectados à rede. Outra necessidade comum em uma rede de computadores é o compartilhamento de arquivos. Compartilhar arquivos permite que você grave seus arquivos em apenas um local, um computador ou um HD externo, e acesse estes arquivos de qualquer outro dispositivo conectado à rede.
+
+Os dispositivos que disponibilizam um determinado serviço pela rede para que outros dispositivos se beneficiem destes serviços são chamados de servidores. O dispositivo responsável por receber o sinal de internet e disponibilizá-lo na rede para outros dispositivos é chamado Servidor de Internet. Um computador que tem uma impressora instalada e compartilha esta impressora com outros dispositivos, é chamado Servidor de Impressão. Da mesma forma, os computadores que compartilham arquivos com outros dispositivos são chamados Servidores de Arquivos.
+
+Economia, praticidade, alta disponibilidade e segurança são apenas algumas das várias razões que nos levam a criar um servidor de arquivos em uma rede de computadores. É claro que, em redes domésticas, sem a necessidade de tanta segurança, apenas o compartilhamento de arquivos que acompanha as versões do Windows que utilizamos em casa são suficientes e dão conta do recado.
+
+Por estas e por outras razões, desde empresas de pequeno porte até empresas de grande porte, o compartilhamento de arquivos é um recurso muito importante. Normalmente, as empresas investem em um servidor de arquivos.
+
+No ambiente empresarial, a tarefa de compartilhar arquivos não é tão simples quanto em uma rede doméstica. É preciso se preocupar com a segurança dos arquivos, evitando que pessoas ou dispositivos não autorizados também não tenham acesso aos arquivos compartilhados. Como são diversos usuários em uma rede empresarial, é desejável que se tenha um controle do que os usuários estão fazendo com os arquivos compartilhados. Os administradores que cuidam dos Servidores de Arquivos precisam ter respostas para perguntas como: "Quem apagou a planilha de faturamento mensal?", "Quem fez o download deste vídeo?".
+
+Existem várias opções de Sistemas Operacionais para se montar um Servidor de Arquivos. Entre as várias opções existentes, neste post vou mostrar como montar um Servidor de Arquivos utilizando o Linux Debian 7 (Wheezy) e o Samba.
+
+O Samba é uma solução criada para o Linux que, permite o compartilhamento de arquivos e impressoras na rede local. Com o Samba, o Servidor configurado fica acessível tanto para clientes utilizando outras versões do Linux quanto para clientes utilizando Windows. O Samba é dividido em dois módulos que são independentes entre si. O primeiro módulo é o servidor, que viabiliza o compartilhamento dos arquivos. O outro é o cliente, que possibilita que outras máquinas utilizando Linux acessem os arquivos compartilhados pelo servidor.
+
+Passo 1 - Download e Instalação do Samba (Servidor)
+
+Faça o download do módulo servidor do Samba:
+
+# apt-get install samba
+
+Instale também a documentação do Samba:
+
+# apt-get install samba-doc 
+
+Passo 2 - Administrando o Samba
+
+Depois de instalado inicie o servidor digitando o comando:
+
+# /etc/init.d/samba start
+
+Se você precisar parar o servidor a qualquer momento digite o comando:
+
+# /etc/init.d/samba stop
+
+Por default, o Samba será inicializado junto com o sistema operacional quando você ligar o computador. Se você quiser desabilitar esta opção digite o comando:
+
+# update-rc.d -f samba remove
+
+Para habilitar novamente a inicialização automática do Samba junto com o Sistema Operacional use o comando:
+
+# update-rc.d -f samba defaults
+
+Enquanto escrevo este post, o Samba está na versão 3.6.6. Você pode verificar a versão do Samba instalado no seu servidor digitando o comando:
+
+# smbd -V
+
+Passo 3 - Configurando o Samba
+
+A grande maioria das configurações que faremos no Samba ficarão no arquivo /etc/samba/smb.conf.
+
+Por default, o Samba cria o arquivo "smb.conf" com algumas configurações default. Para um melhor entendimento, recomendo que você abra este arquivo depois e leia as linhas comentadas. Observe as configurações originais do arquivo. Sem nenhuma dúvida, as configurações originais e os comentários do arquivo "smb.conf" são uma ótima fonte de consulta e aprendizado sobre as configurações do Samba.
+
+Para fazer as configurações do arquivo "smb.conf" desde o início faça um backup do arquivo antes de começar:
+
+# cp /etc/samba/smb.conf /etc/samba/smb.conf.bkp
+
+Em seguida, utilize o "nano" para editar o arquivo de configuração e apague todo o seu conteúdo.
+
+# nano /etc/samba/smb.conf
+
+A configuração do arquivo smb.conf é dividida em seções. A primeira seção que iremos configurar é chamada de "global". Cada seção no arquivo é iniciada com o nome da seção entre colchetes. Portanto crie a seção "global" na primeira linha do arquivo desse jeito:
+
+[global]
+
+O nome "global" é padrão para a configuração da seção global do Samba. A seção "global" possui valores de configuração que são comuns à todas as outras seções do arquivo smb.conf. Para entender melhor como funciona a seção "global" podemos fazer uma analogia ao conceito de herança da orientação à objeto. Todos os atributos que você definir na seção "global" são automaticamente "herdados" pelas outras seções de configuração do seu arquivo "smb.conf".
+
+Dentro de cada seção são definidos os atributos de configuração. Cada atributo de configuração possui um ou mais valores que definem o comportamento do Servidor em relação à seção cujo atributo pertence.
+Um atributo de configuração, deve ser definido dentro das seções da sequinte maneira:
+
+  nome do atributo = valor de configuracao
+
+onde, "nome do atributo" é o nome da característica que estamos configurando e "valor de configuracao" é o valor que especifica o comportamento.
+
+Dentro da seção "global" defina os seguintes atributos de configuração:
+
+[global]
+  netbios name = ServidorSamba
+  workgroup = ArquivosSamba
+  server string = Arquivos compartilhados
+
+Salve o conteúdo do arquivo pressionando simultaneamente as teclas "CTRL + O".
+
+Antes de continuarmos, vamos entender o que foi feito até o momento no arquivo de configuração.
+A linha [global] indica que neste ponto do arquivo inicia a configuração da seção chamada "global". Em seguida o atributo "netbios name = ServidorSamba" especifica qual será o nome do servidor na rede. O atributo "workgroup = ArquivosSamba" especifica o grupo de trabalho ao qual o servidor é membro. O atributo "server string = Arquivos Compartilhados" especifica uma descrição do computador. Nos clientes Windwos, por exemplo, esta descrição será exibida antes do nome do computador no Ambiente de Rede.
+
+No arquivo smb.conf, além da seção "global" precisamos criar uma seção para cada diretório (pasta) que queremos compartilhar. Neste tutorial, vamos criar uma seção chamada "arquivos" que irá compartilhar o diretório "/mnt/compartilhado" e todos os sub-diretórios e arquivos que estiverem dentro dele.
+
+[arquivos]
+  path = /mnt/compartilhado
+  comment = Arquivos compartilhados no Servidor Samba
+
+Os parâmetros da seção "arquivos" são: "path = /mnt/compartilhado", este parâmetro especifica o caminho para o diretório que será compartilhado pelo servidor; "comment = Arquivos compartilhados no Servidor Samba", este parâmetro é opicional e especifica um comentário sobre o compartilhamento.
+
+Depois de tudo, todo o conteúdo do arquivo "smb.conf", deve ter ficado assim:
+
+[global]
+  netbios name = ServidorSamba
+  workgroup = ArquivosSamba
+  server string = Arquivos compartilhados
+[arquivos]
+  path = /mnt/compartilhado
+  comment = Arquivos compartilhados no Servidor Samba
+
+Para que o compartilhamento funcione, salve o arquivo pressionando "CTRL+O" e saia do editor nano pressionando as teclas "CTRL+X". Para testar as configurações que acabamos de fazer digite o comando "testparm" no terminal:
+
+# testparm
+
+Para que as alterações tenham façam efeito no Servidor de Arquivos, sempre que você alterar o arquivo "smb.conf" reinicie o Samba digitando o seguinte comando no terminal:
+
+# /et/init.d/samba restart
+
+Passo 4 - Criando o Diretório e Configurando as Permissões de Acesso
+
+Para que o compartilhamento de arquivos funcione corretamente, devemos criar o diretório que será compartilhado e configurar as permissoes de acesso ao diretório para os usuários.
+
+Para criar o diretório que foi compartilhado nas configurações do arquivo "smb.conf" digite o comando:
+
+# mkdir /mnt/compartilhado
+
+O controle de permissões de acesso do Samba é muito eficaz e seguro. Há diversas possibilidades para controlar as permissões de acesso aos arquivos compartilhados pelo Samba, o que torna também este controle bastante flexível e fácil de ser adaptado para qualquer necessidade.
+
+Para facilitar o entendimento desta tarefa, vou dividir o controle das permissões de acesso em dois níveis.
+
+O primeiro nível será o controle de permissões do próprio sistema operacional, em nosso caso o Debian 7. Primeiro vamos destacar que, todo usuário da rede que terá acesso aos arquivos e pastas compartilhados deverá também ser um usuário cadastrado no Linux. Para quem já trabalha com o Linux há algum tempo, já está acostumado com o controle de permissões de pastas e arquivos. Para quem está iniciando no Linux agora, pode estranhar no início, mas depois verá que o sistema de controle de permissões de acesso do Linux é muito bom e flexível.
+
+Colocando a mão na massa de novo, vamos cadastrar um usuário chamado "rodrigo" no Debian 7 digitando o comando:
+
+# adduser rodrigo
+
+Criando usuário desta forma, mesmo usuários que só precisariam ter acesso às pastas compartilhadas pelo Samba, poderiam usar suas credenciais para acessar o Servidor. Há casos em que você precisa apenas criar um usuário no Ubuntu para que ele tenha acesso às pastas compartilhadas e não quer que este usuário acesse o servidor via ssh ou pelo terminal. Nestes casos, para criar o usuário você deverá usar o comando abaixo:
+
+# adduser --disabled-login --no-create-home rodrigo 
+
+Este comando cria um usuário cadastrado no Linux. O usuário criado não tem pasta home e não poderá acessar o servidor via terminal ou ssh.
+Para liberar o acesso do usuário "rodrigo" à pasta que compartilhamos no Linux, vamos criar um grupo chamado "arquivos".
+
+# groupadd arquivos
+
+Agora vamos tornar o grupo "arquivos" dono do diretório "/mnt/compartilhado".
+
+# chgrp arquivos /mnt/compartilhado
+
+Vamos liberar acesso completo para o dono do diretório e para o grupo. Para os demais usuários vamos liberar apenas o acesso de leitura e execução.
+
+# chmod 775 /mnt/compartilhado
+
+Agora vamos digitar o comando para adicionar o usuário "rodrigo" ao grupo "arquivos".
+
+#  adduser rodrigo arquivos
+
+Utilizar os comandos acima nos dá uma boa ideia do quanto podem ser flexíveis as permissões de acesso às pastas do Linux. Podemos compartilhar uma pasta para um setor em que os funcionários do setor terão acesso completo à pasta. Podemos criar um grupo que tenha acesso somente leitura à pasta compartilhada. Podemos alterar o nível de permissão ou ainda incluir e excluir o acesso das pessoas à pasta apenas trocando-as de grupos no Linux.
+
+Agora que já fizemos a configuração dos usuários e grupos no Linux, vamos configurar o que neste tutorial estamos chamando de Segundo Nível do controle de permissões de acesso. O segundo nível consiste em, adicionar os usuários do Linux no Samba e configurar suas permissões de acesso no arquivo smb.conf.
+
+Para adicionar um usuário do Linux no Samba vamos digitar o comando abaixo:
+
+# smbpasswd -a rodrigo
+
+Ao invés de apenas adicionarmos o usuário no Samba, vamos dar uma olhada em alguns comandos do Samba para administrar os usuários.
+
+A opção "-a" do comando smbpasswd adiciona o usuário do Linux ao Samba. Além disso você pode desabilitar um usuário no Samba com a opção "-d". Por exemplo, vamos supor que o funcionário Rodrigo saiu de licença por um período e que, durante este período não terá acesso às pastas compartilhadas no Servidor. Você pode desabilitá-lo com o comando:
+
+# smbpasswd -d rodrigo
+
+Para reabilitar o acesso do usuário às pastas compartilhadas utilize a opção "-e". Você também pode excluir definitivamente um usuário do Samba utilizando a opção "-x". Lembre-se que, ao excluir um usuário do Samba ele continuará cadastrado no Linux. Portanto, se você pretende excluir o usuário também do Linux precisa utilizar o comando "deluser".
+
+Passo 5 - Alterando o Tipo de Compartilhamento
+
+Por default, o Samba configura todos os compartilhamentos como somente leitura. Para alterar este comportamento e criar um compartilhamento completo, em que os usuários podem ler e gravar arquivos nas pastas compartilhadas, adicione no arquivo "smb.conf", o parâmetro "writeable = yes". Observe abaixo, que fiz a configuração do compartilhamento chamado "arquivos" como completo. Caso você queira que todos os compartilhamentos do servidor sejam completos, basta incluir o parâmetro "writeable = yes" na seção "global".
+
+[global]
+  netbios name = ServidorSamba
+  workgroup = ArquivosSamba
+  server string = Arquivos compartilhados
+[arquivos]
+  path = /mnt/compartilhado
+  comment = Arquivos compartilhados no Servidor Samba
+    writeable = yes
+
+Passo 6 - Habilitando o Acesso dos Usuários ao Compartilhamento
+
+Dentro do arquivo "smb.conf" nós podemos incluir algumas regras de acesso aos arquivos e pastas compartilhados. Colocar regras de acesso no arquivo de configurações, adiciona uma camada extra de proteção aos compartilhamentos.
+
+Para você entender melhor como isso funciona, podemos definir o conteúdo do arquivo "smb.conf" da seguinte forma:
+
+[global]
+  netbios name = ServidorSamba
+  workgroup = ArquivosSamba
+  server string = Arquivos compartilhados
+[arquivos]
+  path = /mnt/compartilhado
+  comment = Arquivos compartilhados no Servidor Samba
+    writeable = yes
+    valid users = rodrigo
+
+No exemplo acima, estamos especificando que o valor do parâmetro "valid users" é "rodrigo". Com esta configuração estamos dizendo que somente o usuário "rodrigo" terá acesso à pasta compartilhada.
+
+Para habilitar o acesso de mais usuários ao mesmo compartilhamento, basta separá-los por vírgula ao especificar o valor do atributo de configuração "valid users". Por exemplo, para dar acesso aos usuários "rodrigo" e "renan" basta substituir a última linha do arquivo de configuração por:
+
+  valid users = rodrigo, renan
+
+Claro que, configurar usuário por usuário em todos os compartilhamentos de um servidor, nem sempre é a solução mais prática. Para resolver este problema, você pode dar permissão de acesso à um grupo de usuários. Desta forma, o Samba irá verificar se o usuário que está tentando acessar à pasta compartilhada, pertence à um dos grupos autorizados no parâmetro "valid users". O comando para validar um grupo de usuários é o mesmo e a diferença é que o nome do grupo deve ser precedido do sinal de "+".
+
+Por exemplo, para dar permissão de acesso à todos os usuários do grupo "arquivos", o parâmetro "valid users" deve ficar assim:
+
+  valid users = +arquivos
+
+Além disso, podemos combinar as duas opções. Vamos supor que o usuário "joao" não é do grupo "arquivos" mas deverá ter acesso ao compartilhamento configurado pela seção "arquivos". A configuração do arquivo "smb.conf" deve ficar assim:
+
+[global]
+  netbios name = ServidorSamba
+  workgroup = ArquivosSamba
+  server string = Arquivos compartilhados
+[arquivos]
+  path = /mnt/compartilhado
+  comment = Arquivos compartilhados no Servidor Samba
+    writeable = yes
+    valid users = +arquivos, joao
+
+Por default, isto é, se não definirmos nenhuma regra de acesso, todos os usuário terão acesso ao compartilhamento. Podemos usar o comando "invalid users" para excluir apenas alguns usuários que não queremos que tenham acesso. Por exemplo, imagine que todos os usuários poderão acessar o compartilhamento chamado "arquivos" menos a usuária "maria". Neste caso, bastaria colocarmos no nosso arquivo "smb.conf" dentro da seção "arquivos" a linha:
+
+[global]
+  netbios name = ServidorSamba
+  workgroup = ArquivosSamba
+  server string = Arquivos compartilhados
+[arquivos]
+  path = /mnt/compartilhado
+  comment = Arquivos compartilhados no Servidor Samba
+    writeable = yes
+    valid users = +arquivos
+    invalid users = maria
+
+Podemos usar a mesma regra do parâmetro "valid users" para trabalhar com grupos de usuários na configuração do parâmetro "invalid users". No exemplo acima, mesmo que a usuária "maria" faça parte do grupo "arquivos" ela não terá acesso ao diretório "/mnt/compartilhado".
+
+Os parâmetros "write list" e "read list" servem para criar listas de usuários com permissões de escrita e permissões de leitura, respectivamente. Por exemplo, podemos dar acesso ao nosso compartilhamento para os usuários "rodrigo" e "renan", porém o usuário "renan" terá apenas permissões de leitura. Para fazer esta configuração basta adicionar as linhas abaixo na seção "arquivos". Para atender estas novas regras de negócio, nosso arquivo "smb.conf" ficou assim:
+
+[global]
+  netbios name = ServidorSamba
+  workgroup = ArquivosSamba
+  server string = Arquivos compartilhados
+[arquivos]
+  path = /mnt/compartilhado
+  comment = Arquivos compartilhados no Servidor Samba
+    writeable = yes
+    valid users = rodrigo, renan
+    read list = renan
+
+Configurando estes três parâmetros estamos dizendo para o Samba que o compartilhamento é completo, ou seja, permite leitura e escrita. Os usuários válidos são "rodrigo" e "renan", somente estes usuários terão acesso ao nosso compartilhamento. Porém, o usuário "renan" terá permissões apenas de leitura, ou seja, não poderá gravar arquivos nas pastas nem alterar e salvar os documentos compartilhados.
+
+Podemos facilmente obter o contrário desta configuração colocando a seguinte combinação de parâmetros de configuração no arquivo "smb.conf":
+
+  writable = no
+  valid users = rodrigo, renan
+  write list = rodrigo
+
+O parâmetro "writable = no" indica que o compartilhamento é somente leitura, portanto todos os usuários terão permissão apenas para ver o conteúdo das pastas e arquivos compartilhados. Os usuários válidos são "rodrigo" e "renan" que foram indicados pelo parâmetro de configuração "valid users". Por fim, o parâmetro "write list" define que somente o usuário "rodrigo" tem permissões de escrita, ou seja, somente este usuário poderá alterar o conteúdo das pastas e arquivos compartilhados.
+
+Passo 7 - Definindo as Permissões de Acesso por IP's
+
+Em alguns casos, além da permissão de usuários pode ser preciso fazer um controle de permissões por endereços IP.
+
+O parâmetro "hosts allow" permite que você informe como valor um endereço IP ou uma lista de endereços IP separados por vírgula. Se você configurar este parâmetro, apenas os endereços IP's da lista terão permissão para acessar o compartilhamento.
+Observe a configuração abaixo.
+
+[global]
+  netbios name = ServidorSamba
+  workgroup = ArquivosSamba
+  server string = Arquivos compartilhados
+[arquivos]
+  path = /mnt/compartilhado
+  comment = Arquivos compartilhados no Servidor Samba
+    writeable = yes
+    valid users = rodrigo, renan
+    read list = renan
+    hosts allow = 192.168.0.1, 192.168.0.5
+
+Repare que a última linha do arquivo de configuração torna o compartilhamento "arquivos", disponível apenas para os IP's 192.168.0.1 e 192.168.0.5. É interessante observar também que os usuários com permissão para acessar este compartilhamento são apenas "rodrigo" e "renan". Você já ter presumindo que, com a configuração acima, os usuários "rodrigo" e "renan" só terão acesso ao compartilhamento se estiverem utilizando os dispositivos de IP 192.168.0.1 e 192.168.0.5.
+
+Também é possível liberar o acesso para uma faixa inteira de endereços IP, basta colocar somente a faixa de endereços, por exemplo:
+
+  hosts allow = 192.168.0.
+
+Você também pode trabalhar com exceções no parâmetro "hosts allow". Por exemplo, você pode configurar para que todos os IP's de uma faixa tenham acesso ao compartilhamento, exceto alguns IP's. Veja abaixo como configurar o parâmetro "hosts allow" para que todos os IP's começados com 192.168.0. tenham acesso ao compartilhamento, exceto os IP's com final 1 e 2.
+
+  hosts allow = 192.168.0. EXCEPT 192.168.0.1, 192.168.0.2
+
+É possível habilitar todos os endereços exceto alguns. Basta configurar o parâmetro "hosts allow" desta forma: hosts allow = ALL EXCEPT 192.168.0.1, para dar permissão de acesso para todos os dispositivos exceto o dispositivo identificado pelo IP 192.168.0.1.
+
+Ao contrário do que o parâmetro "hosts allow" faz, o parâmetro "hosts deny" impede que todos os endereços configurados acessem o compartilhamento.
+
+É importante destacar que, o parâmetro "hosts allow" tem precedência sobre o parâmetro "hosts deny", independente da ordem que são colocados no arquivo de configuração. Ou seja, se você fizer a configuração do parâmetro "hosts deny = 192.168.0.2, 192.168.0.3" e a configuração do parâmetro "hosts allow = 192.168.0.2", o dispositivo com IP = 192.168.0.2 irá acessar o compartilhamento de qualquer forma.
+
+É possível desabilitar um compartilhamento com o parâmetro "available". Este parâmetro aceita dois valores, "yes" que é a opção default e "no". Se você colocar o parâmetro "available = no" em uma seção do arquivo "smb.conf" o compartilhamento fica desabilitado até que você remova esta linha ou altere o valor do parâmetro para "yes". No exemplo abaixo você pode observar o parâmetro "available" configurado na seção "arquivos".
+
+[global]
+  netbios name = ServidorSamba
+  workgroup = ArquivosSamba
+  server string = Arquivos compartilhados
+[arquivos]
+  path = /mnt/compartilhado
+  comment = Arquivos compartilhados no Servidor Samba
+    writeable = yes
+    valid users = rodrigo, renan
+    read list = renan
+    hosts allow = 192.168.0.1, 192.168.0.5
+    available = no
+
+Também é possível tornar o compartilhamento oculto. Tornar o compartilhamento oculto siginifica apenas que ele não irá aparecer diretamente quando o usuário acessar a máquina. Desta forma, para acessar o compartilhamento, o usuário fica obrigado a conhecer o nome do compartilhamento e digitar este nome diretamente na barra de endereços ou no terminal.
+
+Para tornar um compartilhamento oculto, basta incluir na seção referente ao compartilhamento que se quer ocultar o parâmetro "browseable" e atribuir o valor "no" para o parâmetro. Quando quiser que o mapeamento fique visível novamente, atribua o valor "yes" ao parâmetro "browseable" ou então remova a linha da seção "arquivos".
+
+Passo 8 - Definindo mais Opções de Configuração de Usuários
+
+O comando "smbstatus" possibilita que você visualize quais usuários e quais computadores estão acessando os compartilhamentos no Servidor de Arquivos. Para ver o resultado, digite no terminal o comando:
+
+  # smbstatus
+
+Para definir o nível de segurança do Servidor de Arquivos, podemos fazer algumas alterações nos parâmetros da seção "global" no arquivo "smb.conf". Primeiro, observe a nova configuração do arquivo "smb.conf" exibida logo abaixo, em seguida vou comentar sobre os novos parâmetros de configuração que estão destacados em negrito.
+
+[global]
+  netbios name = ServidorSamba
+  workgroup = ArquivosSamba
+  server string = Arquivos compartilhados
+  security = user
+  encrypt passwords = yes
+  invalid users = root
+  username level = 2
+  preserve case = no
+  default case = lower
+  interfaces = eth0
+  bind interfaces only = yes
+  
+[arquivos]
+  path = /mnt/compartilhado
+  comment = Arquivos compartilhados no Servidor Samba
+    writeable = yes
+    valid users = rodrigo, renan
+    read list = renan
+    hosts allow = 192.168.0.1, 192.168.0.5
+    available = no
+
+Dentro da seção "global" o parâmetro "security" define o nível de segurança dos compartilhamentos. Neste caso, estamos mantendo o nível de segurança em nível de usuário. Este nível de segurança solicita permissão de acesso para todos os usuários que tentarem acessar os compartilhamentos. Há ainda outras opções para o parâmetro "security" que são: domain, share e server. Você pode encontrar mais explicações sobre os outros modos de configuração do parâmetro "secutiry" aqui.
+
+O parâmetro "encrypt passowrds = yes" diz ao Servidor de Arquivos para utilizar senhas criptografadas. Esta já é a configuração default do Samba mas, prefiro colocar a linha com o valor default e caso necessários, posteriormente apenas altero o valor de configuração dos parâmetros.
+
+Por motivos de segurança, desabilitamos o acesso aos compartilhamentos do nosso Servidor de Arquivos, por outros usuários logados como "root". Para fazer isso configuramos o já conhecido parâmetro "invalid users = root". Como fizemos esta configuração na seção "global" ela também será utilizada para todos os outros compartilhamentos configurados em nosso Servidor de Arquivos.
+
+O linux é um sistema operacional case sensitive. Quer dizer que, no linux os caracteres maiúsculos são tratados de forma completamente diferente por exemplo que no Windows. Por exemplo, no Linux podemos criar uma conta para o usuário "rodrigo" e outra conta para o usuário "Rodrigo". Como o Windows não é um sistema case sensitive, esta configuração não é possível porque ele considera que "rodrigo" e "Rodrigo" são o mesmo usuário.
+
+Portanto, você pode ter um usuário no Windows com o nome de "Rodrigo" e no linux este usuário é "rodrigo". Para que o Samba resolva estes problemas no momento em que o usuário faz o login, definimos o parâmetro "username level = 2". Desta forma, se no momento do login do usuário o Samba não encontrar na base de usuários um usuário chamado "Rodrigo" como foi informado pelo Windows, ele irá fazer outras buscas alternando entre caracteres maiúsculos e minúsculos. Você pode definir níveis de busca maiores que dois, entretanto quanto maior o nível definido no parâmetro "username level" maior poderá ser o tempo de resposta do login.
+
+Os parâmetros "preserve case = no" e "default case = lower" configuram o Servidor de Arquivos para não armazenar os nomes de de arquivos como são recebidos e sempre armazenar os arquivos definindo o nome com os caracteres minúsculos. Por exemplo, um usuário manda salvar um arquivo com o nome "MeuDocumento.TXT" em uma pasta compartilhada pelo nosso Servidor de Arquivos, o Samba irá renomear o arquivo e salvar como "meudocumento.txt".
+
+Por default, o servidor escuta todas as requisições de compartilhamento e fica disponível em todas as placas de rede do Servidor de Arquivos. O parâmetro configurado na seção "global" como "interface = eth0", muda este comportamento e torna nosso Servidor de Arquivos disponível apenas pela placa de rede configurada em eth0. Para que esta configuração funcione corretamente também configurei o parâmetro "bind interfaces only = yes".
+
+Passo 9 - Compartilhando a pasta home dos usuários
+
+Com o Samba é possível compartilhar a pasta "home" de cada usuário. Cada usuário tem acesso somente à sua pasta "home" e não poderá modificar ou ver os arquivos de outros usuários.
+
+Abaixo, coloquei um exemplo de como podemos configurar nosso arquivo "smb.conf" para que os usuários tenham acesso à sua pasta "home".
+
+[global]
+  netbios name = ServidorSamba
+  workgroup = ArquivosSamba
+  server string = Arquivos compartilhados
+  security = user
+  encrypt passwords = yes
+  invalid users = root
+  username level = 2
+  preserve case = no
+  default case = lower
+  interfaces = eth0
+  bind interfaces only = yes
+  
+[homes]
+  valid users = %s
+  read only = no
+  create mask = 0700
+  directory mask = 0700
+  browseable = no
+
+[arquivos]
+  path = /mnt/compartilhado
+  comment = Arquivos compartilhados no Servidor Samba
+    writeable = yes
+    valid users = rodrigo, renan
+    read list = renan
+    hosts allow = 192.168.0.1, 192.168.0.5
+    available = yes
+
+No conteúdo do arquivo "smb.conf" apresentado logo acima, vamos nos focar agora em entender o que foi feito na seção "homes".
+Primeiro configuramos o parâmetro "valid users = %s" especificando que apenas o próprio usuário tem acesso à pasta home. Os parâmetros "create mask = 0700" e "directory mask = 0700" deixam todos os arquivos e pastas acessíveis apenas pelo usuário. O parâmetro "browseable = no" configura o Servidor de Arquivos para que apenas o próprio usuário veja sua pasta home compartilhada.
+
+Por default, o Samba compartilha toda a pasta home do usuário. Se este não for o comportamento desejado e você quiser compartilhar apenas uma pasta dentro da pasta home, você pode configurar o parâmetro "path". Por exemplo, para compartilhar uma pasta chamada "arquivos" dentro da pasta home de cada usuário, inclua na seção "homes" do arquivo "smb.conf" a seguinte linha:
+
+  path = /home/%u/arquivos
+
+Para que este compartilhamento funcione, você precisará criar a pasta "arquivos" dentro da pasta de cada usuário. As pastas criadas para cada usuário, no momento em que as contas do linux são criadas, vêm da pasta /etc/skel. Para que você não tenha que criar manualmente a pasta "arquivos" toda vez que criar um novo usuário no linus basta digitar o comando seguinte no terminal:
+
+  # mkdir /etc/skel/arquivos
+
+Agora, sempre que você criar um usuário no seu Servidor de Arquivos, o Linux irá criar uma pasta chamada "arquivos" dentro da pasta "homes".
+
+Passo 10 - Configurando um Compartilhamento Público
+
+Em alguns casos, desejamos apenas que os usuários tenham acesso às pastas compartilhadas sem precisarem digitar login e senha.
+
+Para exemplificar o funcionamento deste compartilhamento, vamos supor que você deseja compartilhar um diretório público chamado "public", criado diretamente na raiz do Servidor de Arquivos.
+
+A primeira coisa é criar o diretório público com o comando:
+
+  # mkdir /public
+
+Agora vamos criar um usuário chamado "convidado". Este será o usuário que iremos utilizar para fazer os acessos sem senha ao nosso compartilhamento público. Para criar o usuário "convidado" digite:
+
+  # adduser convidado
+
+Adicione o usuário à lista de usuários do Samba:
+
+  # smbpasswd -a convidado
+
+Mude o dono e o grupo do diretório "public"
+
+  # chown -R convidado:convidado /public
+
+Agora, vamos fazer a configuração dentro do nosso arquivo "smb.conf".
+
+[global]
+  netbios name = ServidorSamba
+  workgroup = ArquivosSamba
+  server string = Arquivos compartilhados
+  security = user
+  encrypt passwords = yes
+  invalid users = root
+  username level = 2
+  preserve case = no
+  default case = lower
+  interfaces = eth0
+  bind interfaces only = yes
+  map to guest = bad user
+  guest account = convidado
+  
+[homes]
+  valid users = %s
+  read only = no
+  create mask = 0700
+  directory mask = 0700
+  browseable = no
+
+[publico]
+  path = /public
+  comment = Arquivos publicos do Servidor Samba
+  available = yes
+  guest ok = yes
+
+[arquivos]
+  path = /mnt/compartilhado
+  comment = Arquivos compartilhados no Servidor Samba
+    writeable = yes
+    valid users = rodrigo, renan
+    read list = renan
+    hosts allow = 192.168.0.1, 192.168.0.5
+    available = yes
+
+A nova configuração do arquivo "smb.conf" apresentada acima mostra como fazer a configuração de um compartilhamento público. Vamos agora analisar os novos parâmetros de configuração da seção "global" e também estudar a nova seção chamada "publico" que foi criada no arquivo.
+
+Na seção "global" configuramos o Samba para mapear os usuários não cadastrados ou com senhas inválidas. Ou seja, sempre que um usuário tentar cadastrar e o login não for válido, este acesso será mapeado para um usuário convidado. Em seguida, o parâmetro "guest account = convidado" configura o Samba para usar o usuário chamado "convidado" nos casos que descrevemos anteriormente.
+
+Também foi criada uma seção chamada "publico". O nome "publico" não é obrigatório e você pode dar qualquer nome para esta seção, bem como criar várias seções públicas com nomes diferentes. Na seção que foi criada, a única novidade é o parâmetro "guest ok = yes". Este parâmetro configura que o compartilhamento desta seção está disponível para a conta mapeada como guest na seção "global".
+
+O parâmetro "guest ok = yes" torna o compartilhamento disponível para todos os usuários. Entretanto, quando o usuário tenta acessar o compartilhamento em uma estação de trabalho, é solicitado o login e a senha. Mesmo que o usuário não tenha um login e uma senha, a tela solicitando o login e senha ainda aparece e independente do que o usuário digite o compartilhamento será aberto.
+
+Em alguns casos, este não é o comportamento desejado quando criamos um compartilhamento público. Às vezes, desejamos que os compartilhamentos públicos estejam disponíveis para todos os usuários sem solicitar login e senha. Para conseguir este comportamento, similar ao Simple Sharing do Windows, em um compartilhamento do Samba, você deve substituir o parâmetro "guest ok = yes" pelo parâmetro "guest only = yes".
+
+Os compartilhamentos são criados, muitas vezes, para atenderem as necessidades de pessoas. As pessoas não são como máquinas. Máquinas são mais constantes e a menos que haja algum problema físico, as máquinas só executam o que foram programadas para executar. As pessoas não são assim programadas e podem  acabar fazendo coisas que não queriam fazer. Em um compartilhamento de arquivos, é normal que um usuário ou outro apague algum arquivo sem querer.
+
+Para ajudar a resolver este tipo de problema, o Samba oferece a possibilidade de criar uma lixeira para os compartilhamentos do Servidor. Observe abaixo, a nova configuração da seção "arquivos" do nosso arquivo "smb.conf".
+
+[arquivos]
+  path = /mnt/compartilhado
+  writeable = yes
+  valid users = rodrigo, renan
+  read list = renan
+  hosts allow = 192.168.0.1, 192.168.0.5
+  available = yes
+  comment = Arquivos compartilhados no Servidor Samba
+  vfs object = recycle
+  recycle:repository = lixeira
+  recycle:keeptree = yes
+  recycle:exclude = *.tmp, *.bak
+  recycle:exclude_dir = tmp, cache
+
+A nova configuração da seção "arquivos", destacada em negrito, cria uma pasta chamada lixeira dentro da pasta compartilhada. Poderia ser qualquer nome que você desejasse. Também configura algumas exclusões, ou seja, se o usuário excluir um arquivo com extensão "tmp" este não irá para a lixeira.
+
+Chegamos ao final de nosso tutorial. Espero, sinceramente, estar ajudando algumas pessoas que como eu já precisaram vasculhar a internet atrás de informações que, nem sempre encontramos em apenas um tutorial.
+A maioria das informações publicadas neste tutorial, foram retiradas do site www.hardware.com.br e você também pode acessá-las neste link. O que fiz, foi apenas pegar as informações de lá, juntar com outras informações que achei importantes e transformar em um exemplo prático de configuração para um Servidor de Arquivos.
+
+Um grande abraço a todos e até o próximo post!

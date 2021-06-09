@@ -1,0 +1,49 @@
+Instalação do Nextcloud no Ubuntu Server
+
+apt install apache2 -f -y
+	systemctl start apache2
+	systemctl enable apache2
+apt install mariadb-server -f -y
+mysql_secure_installation
+apt install php libapache2-mod-php php-mysql -f -y
+apt install phpmyadmin -f -y 
+
+Criar o database no MariaDB
+mariadb
+	CREATE DATABASE nextcloud;
+	CREATE USER nextcloud IDENTIFIED BY '@Lobo#Alfa@';
+	GRANT USAGE ON *.* TO nextcloud@localhost IDENTIFIED BY '@Lobo#Alfa@';
+	GRANT ALL privileges ON nextcloud.* TO nextcloud@localhost;
+	FLUSH PRIVILEGES;
+quit;	
+
+apt install php-gd php-json php-mysql php-curl php-mbstring -f -y
+apt install php-intl php-imagick php-xml php-zip -f -y
+
+Baixar o Nextcloud
+wget https://download.nextcloud.com/server/releases/nextcloud-16.0.1.tar.bz2 
+	tar -xvf nextcloud-16.0.1.tar.bz2
+	cd nextcloud/
+	mv ./* /var/www/html/
+		mv ./.htaccess /var/www/html/
+		mv ./.user.ini /var/www/html/
+	cd /var/www/html/
+		chown -R www-data:www-data ./*
+		chown -R www-data:www-data .htaccess
+		chown -R www-data:www-data .user.ini
+apt install php-gd -f -y
+	systemctl restart apache2
+
+Instalar o Certbot para criar o certificado SSL TLS
+
+sudo apt install certbot -f -y
+apt install python-certbot-apache -f -y
+mcedit /etc/apache2/sites-available/000-default.conf
+systemctl restart apache2
+
+certbot --apache
+
+mkdir /nextcloud-data
+chown www-data:www-data /nextcloud-data/
+chown www-data:www-data /nextcloud-data
+

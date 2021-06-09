@@ -1,0 +1,2 @@
+Montar HD Externo no Linux
+sudo mount /dev/sdb1 /home/servidor/hdexterno
